@@ -1,0 +1,28 @@
+import sys
+import json
+def main():
+    sent_file = open(sys.argv[1]) 
+    tweet_file = open(sys.argv[2]) 
+    scores = {} 
+    for line in sent_file: 
+     term, score  = line.split("\t") 
+     scores[term] = int(score)  
+    tweets=[]   
+    for line in tweet_file:  
+     try:
+       tweets.append(json.loads(line))
+     except:
+       pass
+    for i in range(0,len(tweets),1): 
+     tweet_score=0.0   
+     if 'text' in tweets[i]:
+      tweet_line=tweets[i]["text"] 
+      words=tweet_line.encode('utf-8').split(" ") 
+      for j in range(0,len(words),1):    
+       if words[j] in scores.keys():   
+        tweet_score=tweet_score+scores[words[j]]
+      for j in range(0,len(words),1):
+       if words[j] not in scores.keys():
+        print words[j],tweet_score/(j+1)
+if __name__ == '__main__':
+    main()
