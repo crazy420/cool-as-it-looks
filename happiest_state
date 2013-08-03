@@ -1,0 +1,39 @@
+import sys
+import json
+def main():
+    sent_file = open(sys.argv[1]) #first argument taken as sent_file
+    tweet_file = open(sys.argv[2]) # second taken as tweet_file
+    scores = {} # initialize an empty dictionary
+    for line in sent_file: #for every line in sent_file(sentiment file or AFFIN-111.txt)
+     term, score  = line.split("\t")  # The file is tab-delimited. "\t" means "tab character"
+     scores[term] = int(score)  # Convert the score to an intedge
+    tweets=[]   #creating list called tweets
+    for line in tweet_file:  # for loading tweet text in to a list
+     try:
+       tweets.append(json.loads(line))
+     except:
+       pass
+    con={}
+    happiest=["us",0]
+    for i in range(0,len(tweets),1):
+     if tweets[i].get("place"):
+      if tweets[i]["place"]["country_code"] == "US":  #if tweet has the country code as US
+       tweet_score=0.0
+       place=tweets[i]["place"]["full_name"][-2:] #store the state in place
+       if 'text' in tweets[i]: 
+        tweet_line=tweets[i]["text"]
+        words=tweet_line.encode('utf-8').split(" ")
+        for j in range(0,len(words),1):
+         if words[j] in scores.keys():
+          tweet_score=tweet_score+scores[words[j]]
+        if place in con.keys():     # Checking if the state is already stored in the dictionary
+         con[place]=con[place]+tweet_score  #if present, we add the tweet_score obtained to the total score  stored for the state previously
+         if con[place]>happiest[1]:   #we check if it is greater than the happiest 
+          happiest=[place,con[place]]  #if yes, we replace the happiest
+        else: 
+         con[place]=tweet_score   # if state not present in dictionary( con ), we add it to the dictionary
+         if con[place]>happiest[1]: #we check if it is the happiest
+          happiest=[place,con[place]] #if yes, we replace the happiest with the new one
+    print happiest[0]
+if __name__ == '__main__':
+    main()
